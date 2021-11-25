@@ -20,7 +20,7 @@ LEARN_NUMBER = 3  # Amount of times to sample the memory and train the network
 
 
 class MultiAgent:
-    def __init__(self, num_agents, state_size, action_size, random_seed):
+    def __init__(self, num_agents, state_size, action_size, random_seed, agent_class=Agent):
         """Initialize an Agent object.
 
             Params
@@ -35,7 +35,7 @@ class MultiAgent:
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
         self.run_steps = 0
 
-        self.agents = [Agent(state_size, action_size, random_seed) for _ in range(num_agents)]
+        self.agents = [agent_class(state_size, action_size, random_seed) for _ in range(num_agents)]
 
     def step(self, state, action, reward, next_state, done):
         """Save experience in replay memory, and use random sample from buffer to learn."""

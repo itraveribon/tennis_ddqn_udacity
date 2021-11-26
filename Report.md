@@ -103,8 +103,13 @@ output of the first layer. Finally, the last layer returns a single value as out
 `Q(s,a)`, where `s` is the input state and `a` the input action.
 
 In the above description you can see that the first layer is actually the same for both networks. For that reason, we 
-decide to develop also the classes **NetworkEncoder**, **CriticHead** and **ActorHead**. This classes allow us to solve
-the problem while sharing the first layer among the critic and the actor.
+decided to develop also the classes **NetworkEncoder**, **CriticHead** and **ActorHead**. This classes allow us to solve
+the problem while sharing the first layer among the critic and the actor. Thus, the classes implement the following
+neural networks:
+
+* **NetworkEncoder**: `--->space_size--->Linear(space_size, 256)---ReLU()---BatchNormalization(256)`
+* **CriticHead**: `--->NetworkEncoder output--->Linear(256 + action_size, 128)---ReLU()---BatchNormalization---Linear(128, 1)`
+* **ActorHead**: `--->NetworkEncoder output--->Linear(256, 128)---ReLU()---BatchNormalization---Linear(128, action_size)---Tanh()`
 
 The `output.log` file contains the output of the evaluation.py script. As you can see, the agent with the first part
 of the network shared among actor and critic is not able to solve the environment. The classic DDPG agent

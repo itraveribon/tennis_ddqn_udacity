@@ -111,6 +111,10 @@ neural networks:
 * **CriticHead**: `--->NetworkEncoder output--->Linear(256 + action_size, 128)---ReLU()---BatchNormalization---Linear(128, 1)`
 * **ActorHead**: `--->NetworkEncoder output--->Linear(256, 128)---ReLU()---BatchNormalization---Linear(128, action_size)---Tanh()`
 
+We added the NetworkEncoder parameters to both critic and actor optimizers. Thus, the NetworkEncoder weights are updated
+twice (two optimizer steps) on each learn episode. Each optimizer use the corresponding gradients (critic or actor 
+gradients).
+
 The `output.log` file contains the output of the evaluation.py script. As you can see, the agent with the first part
 of the network shared among actor and critic is not able to solve the environment. The classic DDPG agent
 needs 1825 episodes. 

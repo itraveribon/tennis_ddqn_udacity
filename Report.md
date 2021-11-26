@@ -107,13 +107,19 @@ decide to develop also the classes **NetworkEncoder**, **CriticHead** and **Acto
 the problem while sharing the first layer among the critic and the actor.
 
 The `output.log` file contains the output of the evaluation.py script. As you can see, the agent with the first part
-of the network shared among actor and critic solves the environment faster (after 1264 episodes). The classic DDPG agent
-needs 1825 episodes.
+of the network shared among actor and critic is not able to solve the environment. The classic DDPG agent
+needs 1825 episodes. 
+
+We tried different configurations for the version with shared encoder, i.e., different learning rates, different 
+learning frequency, etc. However, we could not find a hyperparameter configuration that makes the model converge. I took
+a look to the loss function values for actor and critic and they are of different orders. Actor loss values are usually
+ten times greater than critic loss values. I assume that the actor dominates then the learning process of the shared 
+layer and then the critic has almost no influence on the shared layer.
 
 Agent | #Episodes | Avg. Score | Max Avg. Score
 ----- | --------- | ---------- | --------------
 DDQN | 1825 | 0.52 | 1.29
-DDQN_Shared_Encoder | 1264 | 2.23 | 
+DDQN_Shared_Encoder | None | None | 
 
 ![](img.png)
 
@@ -122,6 +128,9 @@ After completing the AlphaZero lesson, I thougt this project would be related to
 Carlo tree search on a continuous action space did not look like the natural solution. I found some papers of people 
 using Monte Carlo Tree Search in such a space and this could be a future work for this project.
 
-The training is a bti slow. I also would give a try to an on policy method like PPO and check if the performance is kept
+The approach with shared layers should somehow work. Maybe we should add some weighting to avoid the dominance of the
+actor loss function.
+
+The training is a bit slow. I also would give a try to an on policy method like PPO and check if the performance is kept
 or even improved with less episodes. A3C would also help us by distributing the learning task and therefore increasing
 the training speed.

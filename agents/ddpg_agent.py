@@ -15,7 +15,7 @@ WEIGHT_DECAY = 0  # .0001  # L2 weight decay
 EPSILON_NOISE = 1.0  # Initialization of noise influence for explorative search
 EPSILON_NOISE_DECAY = 0.999  # Decay of the noise. We want to reduce the exploration in advanced episodes.
 
-device = "cpu"  # torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class Agent:

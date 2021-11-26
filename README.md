@@ -45,9 +45,11 @@ You should provide the tennis executable path to the evaluation script like as f
 
 <code>python evaluation.py --tennis_executable Tennis_Windows_x86_64/Tennis.exe</code>
 
-Executing the evaluation script will generate the following files in the root folder of this repository:
+Executing the evaluation script will generate the following files:
 * A PDF named <code>ddpg_scores.pdf</code> containing a plot of the scores achieved by each model for each timestep.
-* Two files called <code>checkpoint_actor_X.pth</code> containing the weights of the actor neural network, where X is 
-the agent ID.
-* Two files called <code>checkpoint_critic_X.pth</code> containing the weights of the critic neural network, where X is 
-the agent ID.
+* Two files called <code>data/agent/checkpoint_actor_X.pth</code> and two 
+<code>data/agentsharedencoder/checkpoint_actor_X.pth</code> containing the weights of the actor neural network, 
+where X is the agent ID.
+* Two files called <code>data/agent/checkpoint_critic_X.pth</code> and two 
+<code>data/agentsharedencoder/checkpoint_critic_X.pth</code> containing the weights of the critic neural network, where 
+X is the agent ID.

@@ -1,17 +1,20 @@
 import argparse
 import os
+import shutil
 from collections import deque
 
 import numpy as np
+import pandas as pd
 import torch
 from matplotlib import pyplot as plt
 from unityagents import UnityEnvironment
 
 from agents.ddpd_multiagent import MultiAgent
 from agents.ddpg_agent import Agent
+from agents.ddpg_agent_shared_encoder import AgentSharedEncoder
 
 
-def ddpg_training(env: UnityEnvironment, n_episodes: int = 2500, max_t: int = 1000, agent_class=Agent):
+def ddpg_training(env: UnityEnvironment, n_episodes: int = 2000, max_t: int = 1000, agent_class=Agent):
     # get the default brain
     brain_name = env.brain_names[0]
     brain = env.brains[brain_name]
@@ -21,9 +24,13 @@ def ddpg_training(env: UnityEnvironment, n_episodes: int = 2500, max_t: int = 10
     num_agents = len(env_info.agents)
     print("Number of agents:", num_agents)
 
-    agent = MultiAgent(num_agents, state_size=brain.vector_observation_space_size * brain.num_stacked_vector_observations,
+    agent = MultiAgent(
+        num_agents,
+        state_size=brain.vector_observation_space_size * brain.num_stacked_vector_observations,
         action_size=brain.vector_action_space_size,
-        random_seed=0,)
+        random_seed=0,
+        agent_class=agent_class,
+    )
 
     scores_deque = deque(maxlen=100)
     scores = []
@@ -62,9 +69,16 @@ def ddpg_training(env: UnityEnvironment, n_episodes: int = 2500, max_t: int = 10
                     i_episode - 100, np.mean(scores_deque)
                 )
             )
+            model_path = os.path.join(os.path.dirname(__file__), "data", agent_class.__name__.lower())
+            if os.path.isdir(model_path):
+                shutil.rmtree(model_path)
+            os.makedirs(model_path)
+
             for i, single_agent in enumerate(agent.agents):
-                torch.save(single_agent.actor_local.state_dict(), "checkpoint_actor_{i}.pth")
-                torch.save(single_agent.critic_local.state_dict(), "checkpoint_critic_{i}.pth")
+                torch.save(single_agent.actor_local.state_dict(), os.path.join(model_path, f"checkpoint_actor_{i}.pth"))
+                torch.save(
+                    single_agent.critic_local.state_dict(), os.path.join(model_path, f"checkpoint_critic_{i}.pth")
+                )
             solved = True
     return scores
 
@@ -78,8 +92,9 @@ def evaluation(environment_path: str):
     Returns:
 
     """
-    env = UnityEnvironment(file_name=os.path.join(os.path.dirname(__file__), environment_path), no_graphics=True)
+    env = UnityEnvironment(file_name=os.path.join(os.path.dirname(__file__), environment_path), no_graphics=False)
 
+    scores_dqn_shared_encoder = ddpg_training(env, agent_class=AgentSharedEncoder)
     scores_dqn = ddpg_training(env, agent_class=Agent)
 
     # plot the scores
@@ -87,8 +102,11 @@ def evaluation(environment_path: str):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     plt.plot(np.arange(len(scores_dqn)), scores_dqn, label="ddpg")
-    rolling_mean = pd.Series(scores).rolling(rolling_window).mean()
+    plt.plot(np.arange(len(scores_dqn_shared_encoder)), scores_dqn_shared_encoder, label="ddpg_shared_encoder")
+    rolling_mean = pd.Series(scores_dqn).rolling(rolling_window).mean()
     plt.plot(rolling_mean)
+    rolling_mean_shared = pd.Series(scores_dqn_shared_encoder).rolling(rolling_window).mean()
+    plt.plot(rolling_mean_shared)
     plt.legend(loc="upper left")
     plt.ylabel("Score")
     plt.xlabel("Episode #")
